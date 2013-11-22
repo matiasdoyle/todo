@@ -30,7 +30,6 @@ finder.on('directory', function(dir, stat, stop) {
 });
 
 finder.on('file', function(file, stat) {
-  console.log(excluded, file);
   if (excluded.indexOf(file) == -1) files.push(file);
 });
 
