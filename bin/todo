@@ -13,14 +13,12 @@ var todos = {};
 
 program
   .version('0.0.1')
-  .usage('[options] <file/folder ...>')
+  .usage('[options] <file/folder>')
   .option('-C, --no-color', 'Set color output (default: true)')
   .option('-e, --exclude <files ...>', 'Exclude folders and files', exclude)
   .parse(process.argv);
 
-if (!program.args.length) {
-  program.help();
-}
+if (!program.args.length) program.args[0] = '.';
 
 var finder = find(program.args[0]);
 
