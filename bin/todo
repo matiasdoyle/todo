@@ -1,0 +1,85 @@
+#!/usr/bin/env node
+
+var fs = require('fs');
+var path = require('path');
+var find = require('findit');
+var colors = require('colors');
+var program = require('commander');
+var todo = require('..');
+
+var excluded = [ 'node_modules', '.git' ];
+var files = [];
+var todos = {};
+
+program
+  .version('0.0.1')
+  .usage('[options] <file/folder ...>')
+  .option('-C, --no-color', 'Set color output (default: true)')
+  .option('-e, --exclude <files ...>', 'Exclude folders and files', exclude)
+  .parse(process.argv);
+
+if (!program.args.length) {
+  program.help();
+}
+
+var finder = find(program.args[0]);
+
+finder.on('directory', function(dir, stat, stop) {
+  var base = path.basename(dir);
+  if (excluded.indexOf(base) > -1) stop();
+});
+
+finder.on('file', function(file, stat) {
+  console.log(excluded, file);
+  if (excluded.indexOf(file) == -1) files.push(file);
+});
+
+finder.on('end', function() {
+  var pending = files.length;
+  files.forEach(function(file) {
+    fs.readFile(file, { encoding: 'utf8' }, function(err, data) {
+      if (err) throw err;
+      todos[file] = todo(data);
+      if (!--pending) { return printTodos(); }
+    });
+  });
+});
+
+function print() {
+  var str = '';
+  var next;
+
+  for (var i=0; i<arguments.length; i+=2) {
+    next = i + 1;
+    if (String.prototype.hasOwnProperty(arguments[next])) {
+      if (program.color) arguments[i] = arguments[i][arguments[next]];
+      arguments[next] = '\b';
+    }
+
+    str += arguments[i];
+  }
+
+  console.log.apply(null, arguments);
+}
+
+function printTodos() {
+  print('TODO', 'green');
+  for (var i in todos) {
+    if (todos[i].length > 0) {
+      print(i + ' [' + todos[i].length + ']', 'magenta');
+      for (var y in todos[i]) {
+        print('line ' + todos[i][y].ln + ':', 'cyan', todos[i][y].todo, 'white');
+      }
+    } 
+  }
+}
+
+function exclude(val) {
+  var list = val.split(',');
+
+  for (var i=0; i<list.length; i++) {
+    excluded.push(list[i].trim());
+  }
+
+  return list;
+}

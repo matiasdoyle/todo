@@ -1,0 +1,20 @@
+{
+  "name": "todo-comments",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "todo": "./bin/todo"
+  },
+  "dependencies": {
+    "colors": "~0.6.2",
+    "commander": "~2.1.0",
+    "findit": "~1.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Matias Doyle <hello@matiasdoyle.com>",
+  "license": "MIT"
+}
